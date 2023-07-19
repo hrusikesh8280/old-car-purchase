@@ -43,22 +43,24 @@ inventoryRouter.post('/add', async (req, res) => {
 
 
 inventoryRouter.get('/', async (req, res) => {
-    const { price, colors, mileage } = req.query;
-    const { userId } = req.body;
+    const { listPrice, color, mileage, userId } = req.query;
     try {
-      let query = { userId };
-      if (price) {
-        query.price = price;
+      let query = {};
+      if (userId) {
+        query.userId = userId;
       }
-      if (colors) {
-        query['oemId.colors'] = { $in: colors };
+      let inventory = await InventoryModel.find(query).populate('oemId');
+      if (listPrice) {
+        const priceRegex = new RegExp(listPrice);
+        inventory = inventory.filter(item => priceRegex.test(item.oemId.listPrice));
       }
-      const inventoryQuery = InventoryModel.find(query).populate('oemId');
+      if (color) {
+        inventory = inventory.filter(item => item.oemId.colors.includes(color));
+      }
       if (mileage) {
         const mileageRegex = new RegExp(mileage);
-        inventoryQuery.find({ 'oemId.mileage': mileageRegex });
+        inventory = inventory.filter(item => mileageRegex.test(item.oemId.mileage));
       }
-      const inventory = await inventoryQuery.exec();
       res.status(200).json({ data: inventory });
     } catch (error) {
       res.status(500).json({ msg: 'Internal Server Error' });
