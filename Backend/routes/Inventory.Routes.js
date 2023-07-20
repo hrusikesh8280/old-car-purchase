@@ -63,6 +63,7 @@ inventoryRouter.get('/', async (req, res) => {
       }
       res.status(200).json({ data: inventory });
     } catch (error) {
+      console.log(error);
       res.status(500).json({ msg: 'Internal Server Error' });
     }
   });
@@ -79,7 +80,7 @@ inventoryRouter.delete('/:id', async (req, res) => {
 });
 
 
-inventoryRouter.put('/:id', async (req, res) => {
+inventoryRouter.patch('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const {
